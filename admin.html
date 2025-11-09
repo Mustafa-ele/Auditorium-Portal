@@ -1,77 +1,276 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin Panel - Upload Video Link</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <script src="firebase.js"></script>
+  <meta charset="UTF-8">
+  <title>🛠️ Admin Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: white;
+      transition: background-image 1s ease-in-out;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.7);
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .btn {
+      background-color: #2563eb;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    form {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 30px auto;
+      max-width: 600px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      background-color: #22c55e;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #16a34a;
+    }
+
+    .video-item {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .video-info {
+      flex: 1;
+      min-width: 250px;
+      margin-right: 15px;
+    }
+
+    .video-info h3 {
+      margin: 5px 0;
+      font-size: 1.2rem;
+    }
+
+    .video-info p {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .video-actions a, .video-actions button {
+      background-color: #2563eb;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      margin-left: 6px;
+    }
+
+    .video-actions a:hover { background-color: #1e40af; }
+    .video-actions button { background-color: #ef4444; }
+    .video-actions button:hover { background-color: #dc2626; }
+  </style>
 </head>
-<body style="font-family:sans-serif;text-align:center;">
- <h2 class="text-xl font-bold mb-4">Upload New Video</h2>
+<body>
+  <div class="overlay"></div>
 
-<form id="uploadForm">
-  <label class="block mb-2">📅 Date:</label>
-  <input type="date" id="videoDate" required class="border p-2 mb-3 w-full">
+  <header>
+    <h1>🛠️ Admin Dashboard</h1>
+    <div>
+      <a href="index.html" class="btn">🏠 Home</a>
+      <a href="login.html" class="btn">🚪 Logout</a>
+    </div>
+  </header>
 
-  <label class="block mb-2">🎞️ Video Title:</label>
-  <input type="text" id="videoTitle" placeholder="Enter video title" required class="border p-2 mb-3 w-full">
+  <main style="padding: 20px;">
+    <!-- Upload Form -->
+    <form id="uploadForm">
+      <h2>📤 Upload New Video</h2>
+      <input type="date" id="videoDate" required>
+      <input type="text" id="videoTitle" placeholder="Enter video title" required>
+      <input type="text" id="videoLink" placeholder="Paste Google Drive link" required>
+      <button type="submit">Upload</button>
+      <p id="uploadStatus"></p>
+    </form>
 
-  <label class="block mb-2">🔗 Google Drive Video Link:</label>
-  <input type="text" id="videoLink" placeholder="Paste Drive share link" required class="border p-2 mb-3 w-full">
+    <!-- Uploaded Videos List -->
+    <section>
+      <h2 style="margin-bottom: 10px;">📋 Uploaded Videos</h2>
+      <div id="videosContainer"></div>
+    </section>
+  </main>
 
-  <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
-    Upload Video
-  </button>
-</form>
-
-<p id="uploadStatus" class="mt-3 text-green-600"></p>
-
-
-  
+  <!-- Firebase Config -->
   <script>
-  const form = document.getElementById('uploadForm');
-  const status = document.getElementById('uploadStatus');
+    const firebaseConfig = {
+      apiKey: "AIzaSyAt-H3QXKxrRtHo2ym-QvHMA5K5wWg9r3w",
+      authDomain: "jameasaifiyahportal.firebaseapp.com",
+      projectId: "jameasaifiyahportal",
+      storageBucket: "jameasaifiyahportal.firebasestorage.app",
+      messagingSenderId: "78639666781",
+      appId: "1:78639666781:web:8ce9eaf25113c891765fb4",
+      measurementId: "G-7KKGE2P58L"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const videoDate = document.getElementById('videoDate').value;
-    const videoTitle = document.getElementById('videoTitle').value;
-    let videoLink = document.getElementById('videoLink').value;
-
-    if (!videoLink.includes("drive.google.com")) {
-      status.innerText = "❌ Please enter a valid Google Drive link!";
-      return;
+  <!-- Background Image Changer -->
+  <script>
+    const images = [
+      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
+      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1",
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c"
+    ];
+    let index = 0;
+    function changeBackground() {
+      document.body.style.backgroundImage = `url('${images[index]}')`;
+      index = (index + 1) % images.length;
     }
+    changeBackground();
+    setInterval(changeBackground, 7000);
+  </script>
 
-    // ✅ Convert normal drive link to embedded non-downloadable version
-    const match = videoLink.match(/\/d\/(.*?)\//);
-    const fileId = match ? match[1] : null;
-    if (!fileId) {
-      status.innerText = "❌ Invalid Drive link format!";
-      return;
-    }
+  <!-- Upload Function -->
+  <script>
+    const form = document.getElementById('uploadForm');
+    const status = document.getElementById('uploadStatus');
 
-    const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const videoDate = document.getElementById('videoDate').value;
+      const videoTitle = document.getElementById('videoTitle').value;
+      let videoLink = document.getElementById('videoLink').value;
 
-    try {
-      await db.collection("videos").add({
-        title: videoTitle,
-        date: videoDate,
-        link: embedLink,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      if (!videoLink.includes("drive.google.com")) {
+        status.innerText = "❌ Please enter a valid Google Drive link!";
+        return;
+      }
+
+      const match = videoLink.match(/\/d\/(.*?)\//);
+      const fileId = match ? match[1] : null;
+      if (!fileId) {
+        status.innerText = "❌ Invalid Drive link format!";
+        return;
+      }
+
+      const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
+
+      try {
+        await db.collection("videos").add({
+          title: videoTitle,
+          date: videoDate,
+          link: embedLink,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        status.innerText = "✅ Video uploaded successfully!";
+        form.reset();
+      } catch (error) {
+        console.error("Error uploading:", error);
+        status.innerText = "❌ Error uploading video!";
+      }
+    });
+  </script>
+
+  <!-- Show Uploaded Videos + Delete Option -->
+  <script>
+    db.collection("videos").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+      const container = document.getElementById("videosContainer");
+      container.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const video = doc.data();
+        const div = document.createElement("div");
+        div.classList.add("video-item");
+
+        div.innerHTML = `
+          <div class="video-info">
+            <p>📅 ${video.date}</p>
+            <h3>${video.title}</h3>
+          </div>
+          <div class="video-actions">
+            <a href="${video.link}" target="_blank">▶️ Watch</a>
+            <button onclick="deleteVideo('${doc.id}')">🗑️ Delete</button>
+          </div>
+        `;
+
+        container.appendChild(div);
       });
+    });
 
-      status.innerText = "✅ Video uploaded successfully!";
-      form.reset();
-    } catch (error) {
-      console.error("Error uploading:", error);
-      status.innerText = "❌ Error uploading video. Check console.";
+    async function deleteVideo(id) {
+      if (confirm("Are you sure you want to delete this video?")) {
+        try {
+          await db.collection("videos").doc(id).delete();
+          alert("✅ Video deleted successfully!");
+        } catch (err) {
+          console.error("Error deleting:", err);
+          alert("❌ Failed to delete video!");
+        }
+      }
     }
-  });
-</script>
+  </script>
 
-
-  
+  <!-- Security -->
+  <script>
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("keydown", e => {
+      if (e.ctrlKey && (e.key === 's' || e.key === 'u' || e.key === 'p')) e.preventDefault();
+    });
+  </script>
 </body>
 </html>
