@@ -118,21 +118,30 @@
     const db = firebase.firestore();
     const videosList = document.getElementById("videosList");
 
-    // 🔹 Fetch all videos
+    // 🔹 Fetch and display videos
     db.collection("videos").orderBy("date", "desc").onSnapshot(snapshot => {
       videosList.innerHTML = "";
       snapshot.forEach(doc => {
         const data = doc.data();
+        const date = data.date || "No date";
+        const fileName = data.fileName || data.title || "No title";
+        const link = data.link || data.videoLink || "#";
+
         const div = document.createElement("div");
         div.classList.add("video-row");
 
         const videoHTML = `
           <div class="video-info">
-            <span>${data.date}</span> 
-            ${data.fileName} 
-            <a href="${data.link}" target="_blank" class="video-link">🎥 Watch</a>
+            <span>📅 ${date}</span> 
+            <span>🏷️ Title: ${fileName}</span> 
+            <span>🔗 <a href="${link}" target="_blank" class="video-link">${link}</a></span>
           </div>
-          ${isAdmin() ? `<button class="delete-btn" onclick="deleteVideo('${doc.id}')">🗑</button>` : ""}
+          ${isAdmin() ? `
+            <div>
+              <button class="delete-btn" onclick="deleteVideo('${doc.id}')">🗑</button>
+              <button class="delete-btn" style="background:#ffa500" onclick="editVideo('${doc.id}', '${fileName}', '${link}')">✏️</button>
+            </div>` 
+          : ""}
         `;
 
         div.innerHTML = videoHTML;
@@ -146,11 +155,26 @@
       return email.endsWith("@jameasafiyah.edu");
     }
 
-    // 🔹 Delete video (admin only)
+    // 🔹 Delete video
     function deleteVideo(id) {
       if (confirm("Are you sure you want to delete this video?")) {
         db.collection("videos").doc(id).delete().then(() => {
           alert("Video deleted successfully!");
+        });
+      }
+    }
+
+    // 🔹 Edit video
+    function editVideo(id, currentTitle, currentLink) {
+      const newTitle = prompt("Enter new title:", currentTitle);
+      const newLink = prompt("Enter new link:", currentLink);
+
+      if (newTitle && newLink) {
+        db.collection("videos").doc(id).update({
+          fileName: newTitle,
+          link: newLink
+        }).then(() => {
+          alert("Video details updated successfully!");
         });
       }
     }
@@ -161,5 +185,7 @@
       window.location.href = "index.html";
     }
   </script>
+
 </body>
 </html>
+
