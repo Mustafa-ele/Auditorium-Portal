@@ -15,8 +15,13 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #222;
+      margin-bottom: 25px;
+      color: #111;
+      font-size: 28px;
+    }
+
+    h1::before {
+      content: "📚 ";
     }
 
     .top-buttons {
@@ -40,37 +45,42 @@
 
     .video-row {
       background: white;
-      padding: 12px 15px;
-      margin: 8px auto;
-      border-radius: 8px;
+      padding: 15px 20px;
+      margin: 12px auto;
+      border-radius: 10px;
       width: 90%;
       max-width: 800px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .video-info {
       flex: 1;
-      text-align: left;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
     }
 
     .video-info span {
-      display: inline-block;
-      width: 120px;
-      font-weight: bold;
+      font-weight: 500;
     }
 
     .video-link {
-      color: #0066ff;
+      background: #e6f0ff;
+      padding: 4px 10px;
+      border-radius: 5px;
       text-decoration: none;
+      color: #0066ff;
       font-weight: bold;
-      margin-left: 10px;
     }
 
     .video-link:hover {
-      text-decoration: underline;
+      background: #d0e0ff;
     }
 
     .delete-btn {
@@ -80,10 +90,24 @@
       padding: 6px 10px;
       border-radius: 5px;
       cursor: pointer;
+      margin-left: 6px;
     }
 
     .delete-btn:hover {
       background: #ff1c00;
+    }
+
+    .edit-btn {
+      background: #ffa500;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .edit-btn:hover {
+      background: #ff8800;
     }
   </style>
 </head>
@@ -98,7 +122,7 @@
 
   <div id="videosList"></div>
 
-  <!-- Firebase -->
+ <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -121,6 +145,11 @@
     // 🔹 Fetch and display videos
     db.collection("videos").orderBy("date", "desc").onSnapshot(snapshot => {
       videosList.innerHTML = "";
+      if (snapshot.empty) {
+        videosList.innerHTML = "<p style='text-align:center;color:#777;'>No videos uploaded yet.</p>";
+        return;
+      }
+
       snapshot.forEach(doc => {
         const data = doc.data();
         const date = data.date || "No date";
@@ -134,12 +163,12 @@
           <div class="video-info">
             <span>📅 ${date}</span> 
             <span>🏷️ Title: ${fileName}</span> 
-            <span>🔗 <a href="${link}" target="_blank" class="video-link">${link}</a></span>
+            <a href="${link}" target="_blank" class="video-link">🎥 Watch Video</a>
           </div>
           ${isAdmin() ? `
             <div>
+              <button class="edit-btn" onclick="editVideo('${doc.id}', '${fileName}', '${link}')">✏️</button>
               <button class="delete-btn" onclick="deleteVideo('${doc.id}')">🗑</button>
-              <button class="delete-btn" style="background:#ffa500" onclick="editVideo('${doc.id}', '${fileName}', '${link}')">✏️</button>
             </div>` 
           : ""}
         `;
@@ -188,4 +217,5 @@
 
 </body>
 </html>
+
 
