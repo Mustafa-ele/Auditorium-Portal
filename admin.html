@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel - Upload Video Link</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="firebase.js"></script>
+</head>
+<body style="font-family:sans-serif;text-align:center;">
+ <h2 class="text-xl font-bold mb-4">Upload New Video</h2>
+
+<form id="uploadForm">
+  <label class="block mb-2">📅 Date:</label>
+  <input type="date" id="videoDate" required class="border p-2 mb-3 w-full">
+
+  <label class="block mb-2">🎞️ Video Title:</label>
+  <input type="text" id="videoTitle" placeholder="Enter video title" required class="border p-2 mb-3 w-full">
+
+  <label class="block mb-2">🔗 Google Drive Video Link:</label>
+  <input type="text" id="videoLink" placeholder="Paste Drive share link" required class="border p-2 mb-3 w-full">
+
+  <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
+    Upload Video
+  </button>
+</form>
+
+<p id="uploadStatus" class="mt-3 text-green-600"></p>
+
+
+  
+  <script>
+  const form = document.getElementById('uploadForm');
+  const status = document.getElementById('uploadStatus');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const videoDate = document.getElementById('videoDate').value;
+    const videoTitle = document.getElementById('videoTitle').value;
+    let videoLink = document.getElementById('videoLink').value;
+
+    if (!videoLink.includes("drive.google.com")) {
+      status.innerText = "❌ Please enter a valid Google Drive link!";
+      return;
+    }
+
+    // ✅ Convert normal drive link to embedded non-downloadable version
+    const match = videoLink.match(/\/d\/(.*?)\//);
+    const fileId = match ? match[1] : null;
+    if (!fileId) {
+      status.innerText = "❌ Invalid Drive link format!";
+      return;
+    }
+
+    const embedLink = `https://drive.google.com/file/d/${fileId}/preview`;
+
+    try {
+      await db.collection("videos").add({
+        title: videoTitle,
+        date: videoDate,
+        link: embedLink,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      status.innerText = "✅ Video uploaded successfully!";
+      form.reset();
+    } catch (error) {
+      console.error("Error uploading:", error);
+      status.innerText = "❌ Error uploading video. Check console.";
+    }
+  });
+</script>
+
+
+  
+</body>
+</html>
