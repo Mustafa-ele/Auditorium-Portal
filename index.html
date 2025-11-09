@@ -3,95 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jameasafiyah Learning Portal</title>
+  <title>Welcome to Auditorium Portal</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
+      margin: 0;
       font-family: "Poppins", sans-serif;
-      transition: background-image 1s ease-in-out;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-
-    .overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 0;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
+      background: linear-gradient(to bottom right, #eef2ff, #f8fafc);
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       text-align: center;
     }
 
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
 
-    .buttons button {
-      background: rgba(255, 255, 255, 0.9);
-      color: #333;
-      border: none;
-      padding: 12px 24px;
-      margin: 10px;
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 240px;
+    }
+
+    .btn {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 14px;
       border-radius: 8px;
-      font-weight: bold;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
     }
 
-    .buttons button:hover {
-      background: #2563eb;
+    .btn:hover {
+      background-color: #2563eb;
       color: white;
-      transform: scale(1.05);
+      border-color: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* optional background image changer */
+    .bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 1s ease-in-out;
+      opacity: 0.15;
     }
   </style>
 </head>
 <body>
-  <div class="overlay"></div>
+  <div class="bg"></div>
 
-  <div class="container">
-    <h1>Welcome to Jameasafiyah Learning Portal</h1>
-    <div class="buttons">
-      <button>Student</button>
-      <button>Faculty</button>
-      <button onclick="window.location.href='login.html'">Admin</button>
-    </div>
+  <h1>Welcome to Auditorium Portal</h1>
+  <h2>Centre for Learning and Online Access</h2>
+
+  <div class="buttons">
+    <button class="btn">🎓 Login as Student</button>
+    <button class="btn">👨‍🏫 Login as Faculty</button>
+    <button class="btn" onclick="window.location.href='login.html'">🛠️ Login as Admin</button>
   </div>
 
+  <footer>© 2025 Auditorium Portal | Powered by Jameasafiyah</footer>
+
   <script>
-    // Background image list
+    // Optional: Background images that change every 8 seconds
+    const bg = document.querySelector('.bg');
     const images = [
       "https://images.unsplash.com/photo-1523050854058-8df90110c9f1",
       "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
       "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
       "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
     ];
-
     let index = 0;
-
-    function changeBackground() {
-      document.body.style.backgroundImage = `url('${images[index]}')`;
+    function changeBG() {
+      bg.style.backgroundImage = `url('${images[index]}')`;
       index = (index + 1) % images.length;
     }
-
-    changeBackground(); // first background
-    setInterval(changeBackground, 7000); // change every 7 seconds
+    changeBG();
+    setInterval(changeBG, 8000);
   </script>
 </body>
 </html>
